@@ -151,3 +151,16 @@ def check_repetitions_ECB(cipherText, blockSize):
             return True
         else:
             return False
+        
+def find_padding_length(oracle):
+    stop = False
+    startingLen = len(oracle(b''))
+    i = 1
+    while not stop:
+        newLen = len(oracle(b'A'*i))
+        if newLen != startingLen:
+            stop = True
+        else:
+            i += 1
+    blockSizeFound = newLen - startingLen
+    return blockSizeFound

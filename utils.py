@@ -93,9 +93,18 @@ class PKCS7:
         n = self.block_size - len(text) % self.block_size
         return text + bytes([n] * n)
     
-    def unpad(self, text):
+    def validPad(self, text):
+        text = text[-self.block_size:]
         n = text[-1]
-        return text[:-n]
+        if text[-n:] == bytes([n]) * n:
+            return True
+        else:
+            raise Exception('Invalid Padding')
+    
+    def unpad(self, text):
+        if self.validPad(text):
+            n = text[-1]
+            return text[:-n]
     
 class AES_CBC:
     def __init__(self, key, IV):

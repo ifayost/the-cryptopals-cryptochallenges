@@ -72,18 +72,6 @@ def guess_keysize(file, nChunks):
             guessed_keysize = keysize
             min_ = score
     return scores, guessed_keysize
-
-class PKCS7:
-    def __init__(self, block_size):
-        self.block_size = block_size
-
-    def pad(self, text):
-        n = self.block_size - len(text) % self.block_size
-        return text + bytes([n] * n)
-    
-    def unpad(self, text):
-        n = text[-1]
-        return text[:-n]
     
 class PKCS7:
     def __init__(self, block_size):
@@ -154,12 +142,29 @@ class AES_CBC:
         return self._pass_through_cipher(cipherText, 'decrypt')
     
 def check_repetitions_ECB(cipherText, blockSize):
-    blocks = [cipherText[i:i+blockSize] for i in range(0, len(cipherText), blockSize)]
+    blocks = [cipherText[i:i+blockSize] 
+              for i in range(0, len(cipherText), blockSize)]
     for block in blocks:
         if len(blocks) != len(set(blocks)):
             return True
         else:
             return False
+        
+def find_block_size(oracle):
+    stop = False
+    emptyDigest = oracle(b'')
+    i = 1
+    while not stop:
+        newDigest = oracle(b'A'*i)
+        if len(emptyDigest) != len(newDigest):
+            stop = True
+        else:
+            i += 1
+    blockSizeFound = len(newDigest) - len(emptyDigest)
+
+    print(f'Block Size = {blockSizeFound}')
+
+    return blockSizeFound
         
 def find_padding_length(oracle):
     stop = False
